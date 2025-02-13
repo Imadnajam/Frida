@@ -1,8 +1,8 @@
 from fastapi import FastAPI
+from routers.hello_router import router
 
-### Create FastAPI instance with custom docs and openapi url
+# Create FastAPI instance with custom docs and openapi url
 app = FastAPI(docs_url="/api/py/docs", openapi_url="/api/py/openapi.json")
 
-@app.get("/api/py/helloFastApi")
-def hello_fast_api():
-    return {"message": "Hello from FastAPI"}
+# Include the router from the 'router' module
+app.include_router(router)
