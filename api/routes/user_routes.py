@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from controller.user_controller import UserController
+from api.controllers.user_controller import UserController
 from api.config.db import get_database
 
 # Initialize the database
