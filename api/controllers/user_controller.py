@@ -11,6 +11,9 @@ class UserController:
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
         return self.user_model.create_user(username, email, hashed_password, role)
 
+    def get_all_users(self):
+        return self.user_model.get_all_users()
+
     def get_user_by_id(self, user_id):
         return self.user_model.find_user_by_id(user_id)
 
