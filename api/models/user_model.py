@@ -4,8 +4,12 @@ from bson.objectid import ObjectId
 
 class UserModel:
     def __init__(self, db):
-        self.users_collection = db["users"]
+        self.db = db
+        self.collection = db["users"] 
 
+    def get_all_users(self):
+        # Fetch all users from the database
+        return list(self.collection.find())
     def create_user(self, username, email, password, role="user"):
         user = {
             "username": username,
