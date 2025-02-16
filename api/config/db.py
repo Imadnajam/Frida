@@ -7,6 +7,7 @@ load_dotenv()
 
 
 def get_database():
+
     db_uri = os.getenv("MONGODB_URI")
 
     if not db_uri:
@@ -15,6 +16,7 @@ def get_database():
     client = MongoClient(db_uri, server_api=ServerApi("1"))
 
     try:
+   
         client.admin.command("ping")
         print("Pinged your deployment. You successfully connected to MongoDB!")
     except Exception as e:
