@@ -1,5 +1,5 @@
-import bcrypt
 from models.user_model import UserModel
+import bcrypt
 
 
 class UserController:
