@@ -1,4 +1,4 @@
-from models.user_model import UserModel
+from api.models.user_model import UserModel
 import bcrypt
 
 

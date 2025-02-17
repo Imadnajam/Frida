@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from controllers.user_controller import UserController
-from config.db import get_database
+from api.controllers.user_controller import UserController
+from api.config.db import get_database
 
 from pydantic import BaseModel
 
