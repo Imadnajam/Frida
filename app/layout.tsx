@@ -1,11 +1,12 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from 'next-themes'
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Frida",
-  description: "Frida is a Next.js starter kit.",
+  description: "All Files to Markdown Converter.",
 };
 
 export default function RootLayout({
@@ -15,7 +16,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+
+        <ThemeProvider attribute="class" defaultTheme="system">
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
