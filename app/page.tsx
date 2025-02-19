@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import FileUploader from '@/components/uploader';
 import { COMPANY_DETAILS } from '@/utils/constants';
@@ -25,9 +25,7 @@ export default function Home() {
             <p className="mb-6  text-lg">{COMPANY_DETAILS.slogan || "Simplifying your file conversion."}</p>
             <FileUploader />
             <div className="mt-6">
-              <Button variant="default" className="w-full py-2 ">
-                Upload & Convert Files
-              </Button>
+              
             </div>
           </CardContent>
           <CardFooter className="text-center  mt-6">
