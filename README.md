@@ -1,5 +1,7 @@
 # 📄 File-to-Markdown Converter
 
+![Cover](https://raw.githubusercontent.com/Imadnajam/Frida/main/Cover.png)
+
 A **cutting-edge**, **web-based platform** built with **Next.js** for the frontend and **FastAPI** for the backend, designed to convert office documents and files (e.g., Word, Excel, PowerPoint, PDF) into **Markdown** format. This tool simplifies document conversion for developers, writers, and project managers by quickly transforming complex files into lightweight and easy-to-use Markdown files.
 
 ---
