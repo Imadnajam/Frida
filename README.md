@@ -1,4 +1,4 @@
-# 📄 File-to-Markdown Converter
+#  File to Markdown Converter
 
 ![Cover](https://raw.githubusercontent.com/Imadnajam/Frida/main/Cover.png)
 
