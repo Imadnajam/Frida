@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import {
     FileUploader,
@@ -7,15 +8,17 @@ import {
     FileInput,
 } from "@/components/ui/file-upload";
 import { Paperclip } from "lucide-react";
-import { Button } from '@/components/ui/button';
+import {Button} from "@/components/ui/button";
 const FileUploaderTest = () => {
     const [files, setFiles] = useState<File[] | null>(null);
+    const [markdownUrl, setMarkdownUrl] = useState<string | null>(null);
 
     const handleUpload = async () => {
         if (!files || files.length === 0) return;
 
         const formData = new FormData();
-        formData.append("file", files[0]); 
+        formData.append("file", files[0]);
+
         try {
             const response = await fetch("/api/upload", {
                 method: "POST",
@@ -24,7 +27,11 @@ const FileUploaderTest = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                alert(`File uploaded successfully: ${data.filePath}`);
+                alert(`File uploaded successfully!`);
+
+                if (data.markdownFile) {
+                    setMarkdownUrl(data.markdownFile);
+                }
             } else {
                 alert("File upload failed");
             }
@@ -47,7 +54,7 @@ const FileUploaderTest = () => {
                         <p className="mb-1 text-sm">
                             <span className="font-semibold">Click to upload</span> or drag and drop
                         </p>
-                        <p className="text-xs">SVG, PNG, JPG, GIF, PDF</p>
+                        <p className="text-xs">Only PDF files are converted to Markdown</p>
                     </div>
                 </FileInput>
                 <FileUploaderContent>
@@ -61,9 +68,17 @@ const FileUploaderTest = () => {
                         ))}
                 </FileUploaderContent>
             </FileUploader>
-            <Button variant="default" className="w-full py-2 ">
+         <Button variant="default" className="w-full py-2 ">
                 Upload & Convert Files
-            </Button>
+              </Button>
+            {markdownUrl && (
+                <p className="mt-3">
+                    ✅ Markdown file:{" "}
+                    <a href={markdownUrl} target="_blank" className="text-blue-500 underline">
+                        {markdownUrl}
+                    </a>
+                </p>
+            )}
         </div>
     );
 };
