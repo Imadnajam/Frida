@@ -8,13 +8,17 @@ import {
     FileInput,
 } from "@/components/ui/file-upload";
 import { Paperclip } from "lucide-react";
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+
 const FileUploaderTest = () => {
     const [files, setFiles] = useState<File[] | null>(null);
     const [markdownUrl, setMarkdownUrl] = useState<string | null>(null);
 
     const handleUpload = async () => {
-        if (!files || files.length === 0) return;
+        if (!files || files.length === 0) {
+            alert("No files selected");
+            return;
+        }
 
         const formData = new FormData();
         formData.append("file", files[0]);
@@ -27,10 +31,14 @@ const FileUploaderTest = () => {
 
             if (response.ok) {
                 const data = await response.json();
+                console.log("API Response:", data); // Debugging log
                 alert(`File uploaded successfully!`);
 
                 if (data.markdownFile) {
+                    console.log("Setting markdownUrl:", data.markdownFile); // Debugging log
                     setMarkdownUrl(data.markdownFile);
+                } else {
+                    console.error("markdownFile not found in response");
                 }
             } else {
                 alert("File upload failed");
@@ -68,16 +76,24 @@ const FileUploaderTest = () => {
                         ))}
                 </FileUploaderContent>
             </FileUploader>
-         <Button variant="default" className="w-full py-2 ">
+
+            <Button
+                variant="default"
+                className="w-full py-2 mt-4"
+                onClick={handleUpload}
+            >
                 Upload & Convert Files
-              </Button>
-            {markdownUrl && (
+            </Button>
+
+            {markdownUrl ? (
                 <p className="mt-3">
                     ✅ Markdown file:{" "}
-                    <a href={markdownUrl} target="_blank" className="text-blue-500 underline">
+                    <a href={markdownUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
                         {markdownUrl}
                     </a>
                 </p>
+            ) : (
+                <p className="mt-3 text-gray-500">No markdown file generated yet.</p>
             )}
         </div>
     );
