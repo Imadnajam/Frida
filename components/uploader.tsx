@@ -24,7 +24,7 @@ const FileUploaderTest = () => {
         formData.append("file", files[0]);
 
         try {
-            const response = await fetch("/api/upload", {
+            const response = await fetch("/api/py/upload", {
                 method: "POST",
                 body: formData,
             });
