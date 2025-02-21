@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 const FileUploaderTest = () => {
     const [files, setFiles] = useState<File[] | null>(null);
-    const [markdownUrl, setMarkdownUrl] = useState<string | null>(null);
+    const [markdownContent, setMarkdownContent] = useState<string | null>(null);
 
     const handleUpload = async () => {
         if (!files || files.length === 0) {
@@ -31,14 +31,13 @@ const FileUploaderTest = () => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log("API Response:", data); // Debugging log
-                alert(`File uploaded successfully!`);
+                console.log("API Response:", data);
 
-                if (data.markdownFile) {
-                    console.log("Setting markdownUrl:", data.markdownFile); // Debugging log
-                    setMarkdownUrl(data.markdownFile);
+                if (data.markdownContent) {
+                    setMarkdownContent(data.markdownContent);
                 } else {
-                    console.error("markdownFile not found in response");
+                    console.error("Markdown content not found in response");
+                    alert("Failed to extract markdown content.");
                 }
             } else {
                 alert("File upload failed");
@@ -54,7 +53,7 @@ const FileUploaderTest = () => {
             <FileUploader
                 value={files}
                 onValueChange={setFiles}
-                dropzoneOptions={{ maxFiles: 5, maxSize: 4 * 1024 * 1024, multiple: true }}
+                dropzoneOptions={{ maxFiles: 1, maxSize: 4 * 1024 * 1024 }}
                 className="relative bg-background rounded-lg p-2"
             >
                 <FileInput className="outline-dashed outline-1">
@@ -66,14 +65,12 @@ const FileUploaderTest = () => {
                     </div>
                 </FileInput>
                 <FileUploaderContent>
-                    {files &&
-                        files.length > 0 &&
-                        files.map((file, i) => (
-                            <FileUploaderItem key={i} index={i}>
-                                <Paperclip className="h-4 w-4 stroke-current" />
-                                <span>{file.name}</span>
-                            </FileUploaderItem>
-                        ))}
+                    {files?.map((file, i) => (
+                        <FileUploaderItem key={i} index={i}>
+                            <Paperclip className="h-4 w-4 stroke-current" />
+                            <span>{file.name}</span>
+                        </FileUploaderItem>
+                    ))}
                 </FileUploaderContent>
             </FileUploader>
 
@@ -82,18 +79,18 @@ const FileUploaderTest = () => {
                 className="w-full py-2 mt-4"
                 onClick={handleUpload}
             >
-                Upload & Convert Files
+                Upload & Convert File
             </Button>
 
-            {markdownUrl ? (
-                <p className="mt-3">
-                    ✅ Markdown file:{" "}
-                    <a href={markdownUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
-                        {markdownUrl}
-                    </a>
-                </p>
+            {markdownContent ? (
+                <div className="mt-4 p-4 bg-gray-100 rounded-md max-h-64 overflow-y-auto">
+                    <h3 className="text-lg font-bold mb-2">📄 Extracted Markdown Content:</h3>
+                    <pre className="whitespace-pre-wrap text-sm text-gray-700">
+                        {markdownContent}
+                    </pre>
+                </div>
             ) : (
-                <p className="mt-3 text-gray-500">No markdown file generated yet.</p>
+                <p className="mt-3 text-gray-500">No markdown content generated yet.</p>
             )}
         </div>
     );
