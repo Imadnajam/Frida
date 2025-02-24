@@ -1,6 +1,11 @@
+import os
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
+import openai  
+load_dotenv()
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 async def handle_file_upload(file: UploadFile):
@@ -26,8 +31,23 @@ async def handle_file_upload(file: UploadFile):
                 status_code=500, detail="Failed to extract text from PDF"
             )
 
-        # Convert text to Markdown format
-        markdown_content = f"# Extracted Text\n\n{text}"
+        ai_response = openai.ChatCompletion.create(
+            model="gpt-4",  
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {
+                    "role": "user",
+                    "content": f"Summarize the following text in a concise manner:\n\n{text}",
+                },
+            ],
+            max_tokens=500,
+        )
+
+        # Get the AI-generated summary
+        summary = ai_response["choices"][0]["message"]["content"]
+
+        # Convert text to Markdown format with AI summary
+        markdown_content = f"# Extracted Text\n\n{text}\n\n# AI Summary\n\n{summary}"
 
         # Return the Markdown content
         return JSONResponse(
@@ -35,6 +55,7 @@ async def handle_file_upload(file: UploadFile):
             content={
                 "message": "File processed successfully",
                 "markdownContent": markdown_content,
+                "aiSummary": summary,
             },
         )
 
