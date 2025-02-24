@@ -2,20 +2,22 @@ import os
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
-from openai import OpenAI
+from transformers import AutoModelForCausalLM, AutoTokenizer  # For GPT-NeoX
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Initialize OpenAI client
-openai_api_key = os.getenv("OPENAI_API_KEY")
-if not openai_api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set.")
-client = OpenAI(api_key=openai_api_key)
-
 # Constants
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+
+MODEL_NAME = "EleutherAI/gpt-neox-20b"  
+try:
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+except Exception as e:
+    print("Error loading GPT-NeoX model:", str(e))
+    raise RuntimeError("Failed to load GPT-NeoX model.")
 
 
 async def extract_text_from_pdf(file: UploadFile) -> str:
@@ -34,23 +36,26 @@ async def extract_text_from_pdf(file: UploadFile) -> str:
 
 
 async def generate_ai_summary(text: str) -> str:
-  
+    """Generate a summary of the text using GPT-NeoX."""
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",  
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {
-                    "role": "user",
-                    "content": f"Summarize the following text in a concise manner:\n\n{text}",
-                },
-            ],
-            max_tokens=500,
+        # Tokenize input text
+        inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+
+        # Generate summary using GPT-NeoX
+        outputs = model.generate(
+            **inputs,
+            max_length=200,  # Adjust max_length as needed
+            num_return_sequences=1,
+            no_repeat_ngram_size=2,
+            early_stopping=True,
         )
-        return response.choices[0].message.content
+
+        # Decode the generated summary
+        summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        return summary
     except Exception as e:
-        print("OpenAI API Error:", str(e))
-        raise HTTPException(status_code=500, detail=f"OpenAI API Error: {str(e)}")
+        print("GPT-NeoX Error:", str(e))
+        raise HTTPException(status_code=500, detail=f"GPT-NeoX Error: {str(e)}")
 
 
 async def handle_file_upload(file: UploadFile):
