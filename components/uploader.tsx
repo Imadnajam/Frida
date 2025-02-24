@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 const FileUploaderTest = () => {
     const [files, setFiles] = useState<File[] | null>(null);
     const [markdownContent, setMarkdownContent] = useState<string | null>(null);
+    const [aiSummary, setAiSummary] = useState<string | null>(null); // State for AI summary
 
     const handleUpload = async () => {
         if (!files || files.length === 0) {
@@ -33,11 +34,12 @@ const FileUploaderTest = () => {
                 const data = await response.json();
                 console.log("API Response:", data);
 
-                if (data.markdownContent) {
+                if (data.markdownContent && data.aiSummary) {
                     setMarkdownContent(data.markdownContent);
+                    setAiSummary(data.aiSummary); // Set AI summary
                 } else {
-                    console.error("Markdown content not found in response");
-                    alert("Failed to extract markdown content.");
+                    console.error("Markdown content or AI summary not found in response");
+                    alert("Failed to extract markdown content or AI summary.");
                 }
             } else {
                 alert("File upload failed");
@@ -82,15 +84,26 @@ const FileUploaderTest = () => {
                 Upload & Convert File
             </Button>
 
-            {markdownContent ? (
-                <div className="mt-4 p-4 bg-gray-100 rounded-md max-h-64 overflow-y-auto">
-                    <h3 className="text-lg font-bold mb-2">📄 Extracted Markdown Content:</h3>
-                    <pre className="whitespace-pre-wrap text-sm text-gray-700">
-                        {markdownContent}
-                    </pre>
+            {markdownContent && aiSummary ? (
+                <div className="mt-4 space-y-4">
+                    {/* Display Extracted Markdown Content */}
+                    <div className="p-4 bg-gray-100 rounded-md max-h-64 overflow-y-auto">
+                        <h3 className="text-lg font-bold mb-2">📄 Extracted Markdown Content:</h3>
+                        <pre className="whitespace-pre-wrap text-sm text-gray-700">
+                            {markdownContent}
+                        </pre>
+                    </div>
+
+                    {/* Display AI Summary */}
+                    <div className="p-4 bg-blue-50 rounded-md max-h-64 overflow-y-auto">
+                        <h3 className="text-lg font-bold mb-2">🤖 AI Summary:</h3>
+                        <pre className="whitespace-pre-wrap text-sm text-blue-700">
+                            {aiSummary}
+                        </pre>
+                    </div>
                 </div>
             ) : (
-                <p className="mt-3 text-gray-500">No markdown content generated yet.</p>
+                <p className="mt-3 text-gray-500">No content generated yet.</p>
             )}
         </div>
     );

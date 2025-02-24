@@ -2,16 +2,17 @@ import os
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
-import openai
+from openai import OpenAI
 from dotenv import load_dotenv
 
-
+# Load environment variables
 load_dotenv()
 
+# Initialize OpenAI client
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY environment variable is not set.")
-openai.api_key = openai_api_key
+client = OpenAI(api_key=openai_api_key)
 
 # Constants
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -19,18 +20,24 @@ MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 
 async def extract_text_from_pdf(file: UploadFile) -> str:
     """Extract text from a PDF file."""
-    pdf_reader = PdfReader(file.file)
-    text = ""
-    for page in pdf_reader.pages:
-        text += page.extract_text()
-    return text
+    try:
+        pdf_reader = PdfReader(file.file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text()
+        return text
+    except Exception as e:
+        print("Error extracting text from PDF:", str(e))
+        raise HTTPException(
+            status_code=500, detail=f"Error extracting text from PDF: {str(e)}"
+        )
 
 
 async def generate_ai_summary(text: str) -> str:
-    """Generate a summary of the text using OpenAI's GPT-4."""
+  
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",  
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {
@@ -40,11 +47,10 @@ async def generate_ai_summary(text: str) -> str:
             ],
             max_tokens=500,
         )
-        return response["choices"][0]["message"]["content"]
+        return response.choices[0].message.content
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to generate AI summary: {str(e)}"
-        )
+        print("OpenAI API Error:", str(e))
+        raise HTTPException(status_code=500, detail=f"OpenAI API Error: {str(e)}")
 
 
 async def handle_file_upload(file: UploadFile):
@@ -92,6 +98,7 @@ async def handle_file_upload(file: UploadFile):
         )
 
     except HTTPException:
-        raise  
+        raise  # Re-raise HTTPException to return specific error responses
     except Exception as e:
+        print("Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
