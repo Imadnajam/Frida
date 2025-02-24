@@ -10,8 +10,7 @@ load_dotenv()
 
 # Constants
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
-
-MODEL_NAME = "EleutherAI/gpt-neox-20b"  
+MODEL_NAME = "EleutherAI/gpt-neo-125M"  # Smaller model
 try:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
