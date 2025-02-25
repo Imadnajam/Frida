@@ -2,8 +2,9 @@ import os
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
-from transformers import AutoModelForCausalLM, AutoTokenizer  # For GPT-NeoX
+from transformers import AutoModelForCausalLM, AutoTokenizer  
 from dotenv import load_dotenv
+import re
 
 # Load environment variables
 load_dotenv()
@@ -17,6 +18,14 @@ try:
 except Exception as e:
     print("Error loading GPT-NeoX model:", str(e))
     raise RuntimeError("Failed to load GPT-NeoX model.")
+
+
+def clean_text(text: str) -> str:
+    
+    cleaned_text = re.sub(r"[\$\^*\\_\[\]{}()~#]", "", text)
+    cleaned_text = " ".join(cleaned_text.split())
+
+    return cleaned_text
 
 
 async def extract_text_from_pdf(file: UploadFile) -> str:
@@ -35,9 +44,9 @@ async def extract_text_from_pdf(file: UploadFile) -> str:
 
 
 async def generate_ai_summary(text: str) -> str:
-    
+    """Generate a summary of the text using GPT-NeoX."""
     try:
-        # Craft a detailed prompt
+        # Internal prompt (not included in the output)
         prompt = (
             "Provide a detailed summary of the following text. "
             "Include key points, data, and insights. "
@@ -45,7 +54,7 @@ async def generate_ai_summary(text: str) -> str:
             f"{text}"
         )
 
-        # Tokenize input text
+        # Tokenize the input text (using the internal prompt)
         inputs = tokenizer(
             prompt, return_tensors="pt", truncation=True, max_length=1024
         )
@@ -57,7 +66,7 @@ async def generate_ai_summary(text: str) -> str:
             num_return_sequences=1,
             no_repeat_ngram_size=2,
             early_stopping=True,
-            temperature=0.7, 
+            temperature=0.7,  
             top_p=0.9,  
         )
 
@@ -70,7 +79,7 @@ async def generate_ai_summary(text: str) -> str:
 
 
 async def handle_file_upload(file: UploadFile):
-    """Handle file upload, extract text, and generate AI summary."""
+    """Handle file upload, extract text, clean it, and generate AI summary."""
     try:
         # Validate file presence
         if not file:
@@ -97,19 +106,19 @@ async def handle_file_upload(file: UploadFile):
                 status_code=500, detail="Failed to extract text from PDF"
             )
 
-        # Generate AI summary
-        summary = await generate_ai_summary(text)
+        # Clean the extracted text
+        cleaned_text = clean_text(text)
 
-        # Format Markdown content
-        markdown_content = f"# Extracted Text\n\n{text}\n\n# AI Summary\n\n{summary}"
+        # Generate AI summary
+        summary = await generate_ai_summary(cleaned_text)
 
         # Return the response
         return JSONResponse(
             status_code=200,
             content={
                 "message": "File processed successfully",
-                "markdownContent": markdown_content,
-                "aiSummary": summary,
+                "extractedText": cleaned_text,  # Optional: Include cleaned text if needed
+                "aiSummary": summary,  # AI-generated summary
             },
         )
 
