@@ -20,7 +20,7 @@ except Exception as e:
 
 
 async def extract_text_from_pdf(file: UploadFile) -> str:
-    """Extract text from a PDF file."""
+
     try:
         pdf_reader = PdfReader(file.file)
         text = ""
@@ -35,18 +35,30 @@ async def extract_text_from_pdf(file: UploadFile) -> str:
 
 
 async def generate_ai_summary(text: str) -> str:
-    """Generate a summary of the text using GPT-NeoX."""
+    
     try:
+        # Craft a detailed prompt
+        prompt = (
+            "Provide a detailed summary of the following text. "
+            "Include key points, data, and insights. "
+            "Explain the main ideas, supporting evidence, and conclusions.\n\n"
+            f"{text}"
+        )
+
         # Tokenize input text
-        inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512)
+        inputs = tokenizer(
+            prompt, return_tensors="pt", truncation=True, max_length=1024
+        )
 
         # Generate summary using GPT-NeoX
         outputs = model.generate(
             **inputs,
-            max_length=200,  # Adjust max_length as needed
+            max_length=500,  
             num_return_sequences=1,
             no_repeat_ngram_size=2,
             early_stopping=True,
+            temperature=0.7, 
+            top_p=0.9,  
         )
 
         # Decode the generated summary
