@@ -6,7 +6,7 @@
     "fastapi-dev": "pip3 install -r requirements.txt && python -m uvicorn api.index:app --reload",
     "next-dev": "next dev",
     "dev": "concurrently \"npm run next-dev\" \"npm run fastapi-dev\"",
-    "build": "next build",
+    "build": "pip3 install -r requirements.txt && rm -rf __pycache__ && next build",
     "start": "next start",
     "lint": "next lint"
   },
