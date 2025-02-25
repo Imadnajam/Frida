@@ -2,15 +2,15 @@ import os
 from fastapi import UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
-from transformers import AutoModelForCausalLM, AutoTokenizer  
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from dotenv import load_dotenv
 import re
 
 load_dotenv()
 
 # Constants
-MAX_FILE_SIZE = 10 * 1024 * 1024  
-MODEL_NAME = "EleutherAI/gpt-neo-125M"  
+MAX_FILE_SIZE = 10 * 1024 * 1024
+MODEL_NAME = "EleutherAI/gpt-neo-125M"
 try:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
@@ -20,7 +20,7 @@ except Exception as e:
 
 
 def clean_text(text: str) -> str:
-    
+
     cleaned_text = re.sub(r"[\$\^*\\_\[\]{}()~#]", "", text)
     cleaned_text = " ".join(cleaned_text.split())
 
@@ -61,12 +61,12 @@ async def generate_ai_summary(text: str) -> str:
         # Generate summary using GPT-NeoX
         outputs = model.generate(
             **inputs,
-            max_length=500,  
+            max_length=500,
             num_return_sequences=1,
             no_repeat_ngram_size=2,
             early_stopping=True,
-            temperature=0.7,  
-            top_p=0.9,  
+            temperature=0.7,
+            top_p=0.9,
         )
 
         # Decode the generated summary
@@ -108,6 +108,9 @@ async def handle_file_upload(file: UploadFile):
         # Clean the extracted text
         cleaned_text = clean_text(text)
 
+        # Format the cleaned text as a markdown code block
+        markdown_code_block = f"```\n{cleaned_text}\n```"
+
         # Generate AI summary
         summary = await generate_ai_summary(cleaned_text)
 
@@ -116,13 +119,13 @@ async def handle_file_upload(file: UploadFile):
             status_code=200,
             content={
                 "message": "File processed successfully",
-                "markdownContent": cleaned_text,
+                "markdownContent": markdown_code_block,
                 "aiSummary": summary,
             },
         )
 
     except HTTPException:
-        raise  
+        raise
     except Exception as e:
         print("Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")

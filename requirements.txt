@@ -1,7 +1,6 @@
-
-fastapi==0.115.8
+fastapi==0.115.0
 pydantic==2.10.6
-pymongo==3.12.0
+pymongo==4.9.0  # Updated to a version compatible with motor
 PyPDF2==3.0.1
 python-dotenv==1.0.1
 transformers==4.49.0
@@ -10,3 +9,5 @@ torchaudio==2.6.0
 torchvision==0.21.0
 uvicorn==0.30.6
 bcrypt==3.2.0
+motor==3.6.0  
+python-multipart==0.0.20

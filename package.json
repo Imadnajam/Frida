@@ -1,12 +1,12 @@
 {
-  "name": "nextjs-fastapi",
+  "name": "Frida",
   "version": "0.2.0",
   "private": true,
   "scripts": {
     "fastapi-dev": "pip3 install -r requirements.txt && python -m uvicorn api.index:app --reload",
     "next-dev": "next dev",
     "dev": "concurrently \"npm run next-dev\" \"npm run fastapi-dev\"",
-    "build": "pip3 install -r requirements.txt && rm -rf __pycache__ && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
