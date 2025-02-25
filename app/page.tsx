@@ -19,7 +19,7 @@ export default function Home() {
       <div className="flex-grow flex items-center justify-center p-4">
         <Card className="w-full max-w-lg shadow-2xl rounded-2xl p-6 transition-transform transform hover:scale-105">
           <CardHeader>
-            <CardTitle className="text-3xl font-extrabold ">Welcome to {COMPANY_DETAILS.name}!</CardTitle>
+           
           </CardHeader>
           <CardContent>
             <p className="mb-6  text-lg">{COMPANY_DETAILS.slogan || "Simplifying your file conversion."}</p>
