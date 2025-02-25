@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/file-upload";
 import { Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
 
 const FileUploaderTest = () => {
     const [files, setFiles] = useState<File[] | null>(null);
@@ -86,21 +87,29 @@ const FileUploaderTest = () => {
 
             {markdownContent && aiSummary ? (
                 <div className="mt-4 space-y-4">
-                    {/* Display Extracted Markdown Content */}
-                    <div className="p-4 bg-gray-100 rounded-md max-h-64 overflow-y-auto">
-                        <h3 className="text-lg font-bold mb-2">📄 Extracted Markdown Content:</h3>
-                        <pre className="whitespace-pre-wrap text-sm text-gray-700">
-                            {markdownContent}
-                        </pre>
-                    </div>
+                    {/* Card for Extracted Markdown Content */}
+                    <Card>
+                        <CardHeader>
+                            <h3 className="text-lg font-bold">Extracted Markdown Content</h3>
+                        </CardHeader>
+                        <CardContent className="max-h-64 overflow-y-auto">
+                            <pre className="whitespace-pre-wrap text-sm text-gray-700">
+                                {markdownContent}
+                            </pre>
+                        </CardContent>
+                    </Card>
 
-                    {/* Display AI Summary */}
-                    <div className="p-4 bg-blue-50 rounded-md max-h-64 overflow-y-auto">
-                        <h3 className="text-lg font-bold mb-2">🤖 AI Summary:</h3>
-                        <pre className="whitespace-pre-wrap text-sm text-blue-700">
-                            {aiSummary}
-                        </pre>
-                    </div>
+                    {/* Card for AI Summary */}
+                    <Card>
+                        <CardHeader>
+                            <h3 className="text-lg font-bold">Frida Summary</h3>
+                        </CardHeader>
+                        <CardContent className="max-h-64 overflow-y-auto">
+                            <pre className="whitespace-pre-wrap text-sm text-blue-700">
+                                {aiSummary}
+                            </pre>
+                        </CardContent>
+                    </Card>
                 </div>
             ) : (
                 <p className="mt-3 text-gray-500">No content generated yet.</p>

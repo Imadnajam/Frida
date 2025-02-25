@@ -6,12 +6,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from dotenv import load_dotenv
 import re
 
-# Load environment variables
 load_dotenv()
 
 # Constants
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
-MODEL_NAME = "EleutherAI/gpt-neo-125M"  # Smaller model
+MAX_FILE_SIZE = 10 * 1024 * 1024  
+MODEL_NAME = "EleutherAI/gpt-neo-125M"  
 try:
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
@@ -117,13 +116,13 @@ async def handle_file_upload(file: UploadFile):
             status_code=200,
             content={
                 "message": "File processed successfully",
-                "extractedText": cleaned_text,  # Optional: Include cleaned text if needed
-                "aiSummary": summary,  # AI-generated summary
+                "markdownContent": cleaned_text,
+                "aiSummary": summary,
             },
         )
 
     except HTTPException:
-        raise  # Re-raise HTTPException to return specific error responses
+        raise  
     except Exception as e:
         print("Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
