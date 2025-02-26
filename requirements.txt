@@ -1,13 +1,16 @@
-fastapi==0.115.0
+beautifulsoup4==4.13.3
+docx2txt==0.8
+fastapi==0.115.8
+html2text==2020.1.16
+mammoth==1.6.0
+openpyxl==3.1.2
+Pillow==10.0.0
+
 pydantic==2.10.6
-pymongo==4.9.0  # Updated to a version compatible with motor
+pymongo==3.12.0
 PyPDF2==3.0.1
 python-dotenv==1.0.1
-transformers==4.49.0
-torch==2.6.0
-torchaudio==2.6.0
-torchvision==0.21.0
-uvicorn==0.30.6
 bcrypt==3.2.0
-motor==3.6.0  
-python-multipart==0.0.20
+transformers==4.49.0
+markdown==3.5
+uvicorn==0.30.6

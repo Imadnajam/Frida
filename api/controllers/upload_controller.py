@@ -12,7 +12,9 @@ load_dotenv()
 MAX_FILE_SIZE = 10 * 1024 * 1024
 MODEL_NAME = "EleutherAI/gpt-neo-125M"
 try:
+    
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer.pad_token = tokenizer.eos_token
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
 except Exception as e:
     print("Error loading GPT-NeoX model:", str(e))
@@ -53,7 +55,7 @@ async def generate_ai_summary(text: str) -> str:
             f"{text}"
         )
 
-        # Tokenize the input text (using the internal prompt)
+        
         inputs = tokenizer(
             prompt, return_tensors="pt", truncation=True, max_length=1024
         )
