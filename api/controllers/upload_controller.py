@@ -61,12 +61,11 @@ async def generate_ai_summary(text: str) -> str:
         # Generate summary using GPT-NeoX
         outputs = model.generate(
             **inputs,
-            max_length=500,
+            max_new_tokens=500,
+            num_beams=5,
+            early_stopping=True,
             num_return_sequences=1,
             no_repeat_ngram_size=2,
-            early_stopping=True,
-            temperature=0.7,
-            top_p=0.9,
         )
 
         # Decode the generated summary
