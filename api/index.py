@@ -17,3 +17,9 @@ app.add_middleware(
 app.include_router(converter_router, prefix="/api/py")
 app.include_router(user_routes, prefix="/api/py")
 app.include_router(upload_router, prefix="/api/py")
+
+
+
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to Frida the FastAPI application!"}
