@@ -15,7 +15,7 @@ export async function uploadFile(file) {
         formData.append("file", file);
 
         // Step 1: Upload and convert the file
-        const conversionResponse = await fetch("/api/convert", {
+        const conversionResponse = await fetch("/api/py/convert", {
             method: "POST",
             body: formData,
         });
@@ -31,7 +31,7 @@ export async function uploadFile(file) {
             throw new Error(conversionData.message || "Conversion unsuccessful");
         }
 
-        const summaryResponse = await fetch("/api/summarize", {
+        const summaryResponse = await fetch("/api/py/summarize", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -74,7 +74,7 @@ export async function uploadFile(file) {
  */
 export async function getSupportedFormats() {
     try {
-        const response = await fetch("/api/supported-formats");
+        const response = await fetch("/api/py/supported-formats");
 
         if (!response.ok) {
             throw new Error("Failed to fetch supported formats");
