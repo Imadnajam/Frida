@@ -25,22 +25,22 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { uploadFile } from "@/app/api/upload_api";
+import { uploadFile } from "@/app/api/upload_api2";
 
 const DocumentConverter = () => {
-    const [files, setFiles] = useState(null);
+    const [files, setFiles] = useState<File[]>([]);
     const [markdownContent, setMarkdownContent] = useState(null);
     const [aiSummary, setAiSummary] = useState(null);
-    const [fileMetadata, setFileMetadata] = useState(null);
+    const [fileMetadata, setFileMetadata] = useState<{ filename: string; content_type: string; size: number } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [activeTab, setActiveTab] = useState("preview");
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
     const [copySuccess, setCopySuccess] = useState(false);
 
     // Simulated progress during conversion
     useEffect(() => {
-        let interval;
+        let interval: NodeJS.Timeout;
         if (isLoading) {
             setProgress(0);
             interval = setInterval(() => {
@@ -63,7 +63,7 @@ const DocumentConverter = () => {
         }
     }, [markdownContent, isLoading]);
 
-    const getFileIcon = (file) => {
+    const getFileIcon = (file: { type: string }) => {
         if (!file) return <Paperclip />;
         const type = file.type;
 
@@ -75,8 +75,8 @@ const DocumentConverter = () => {
     };
 
     const handleUpload = async () => {
-        if (!files || files.length === 0) {
-            setError("Please select a file to convert");
+        if (files.length === 0) {
+            alert("Please select a file to convert");
             return;
         }
 
@@ -85,7 +85,12 @@ const DocumentConverter = () => {
         setCopySuccess(false);
 
         try {
-            const { markdownContent, aiSummary, metadata } = await uploadFile(files[0]);
+            const { markdownContent, aiSummary } = await uploadFile(files[0]);
+            const metadata = {
+                filename: files[0].name,
+                content_type: files[0].type,
+                size: files[0].size
+            };
             setMarkdownContent(markdownContent);
             setAiSummary(aiSummary);
             setFileMetadata(metadata || {
@@ -103,7 +108,7 @@ const DocumentConverter = () => {
     };
 
     const handleReset = () => {
-        setFiles(null);
+        setFiles([]);
         setMarkdownContent(null);
         setAiSummary(null);
         setFileMetadata(null);
@@ -111,7 +116,7 @@ const DocumentConverter = () => {
         setCopySuccess(false);
     };
 
-    const copyToClipboard = (content) => {
+    const copyToClipboard = (content: string) => {
         navigator.clipboard.writeText(content).then(
             () => {
                 setCopySuccess(true);
@@ -137,7 +142,7 @@ const DocumentConverter = () => {
         URL.revokeObjectURL(url);
     };
 
-    const formatBytes = (bytes, decimals = 2) => {
+    const formatBytes = (bytes: number, decimals = 2) => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
         const dm = decimals < 0 ? 0 : decimals;
@@ -182,7 +187,7 @@ const DocumentConverter = () => {
                         <div className="space-y-4">
                             <FileUploader
                                 value={files}
-                                onValueChange={setFiles}
+                                onValueChange={(value) => setFiles(value || [])}
                                 dropzoneOptions={{
                                     maxFiles: 1,
                                     maxSize: 20 * 1024 * 1024

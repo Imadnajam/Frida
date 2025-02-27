@@ -1,36 +1,36 @@
-import os
-from fastapi import UploadFile, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from dotenv import load_dotenv
 import re
 
-load_dotenv()
+# Initialize FastAPI app
+app = FastAPI()
 
 # Constants
-MAX_FILE_SIZE = 10 * 1024 * 1024
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
 MODEL_NAME = "EleutherAI/gpt-neo-125M"
+
+# Load tokenizer and model
 try:
-    
     tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-    tokenizer.pad_token = tokenizer.eos_token
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token  # Use EOS token as PAD token
     model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
 except Exception as e:
     print("Error loading GPT-NeoX model:", str(e))
     raise RuntimeError("Failed to load GPT-NeoX model.")
 
 
+# Utility function to clean text
 def clean_text(text: str) -> str:
-
     cleaned_text = re.sub(r"[\$\^*\\_\[\]{}()~#]", "", text)
     cleaned_text = " ".join(cleaned_text.split())
-
     return cleaned_text
 
 
+# Extract text from PDF
 async def extract_text_from_pdf(file: UploadFile) -> str:
-
     try:
         pdf_reader = PdfReader(file.file)
         text = ""
@@ -44,10 +44,10 @@ async def extract_text_from_pdf(file: UploadFile) -> str:
         )
 
 
+# Generate AI summary using GPT-NeoX
 async def generate_ai_summary(text: str) -> str:
-    """Generate a summary of the text using GPT-NeoX."""
     try:
-        # Internal prompt (not included in the output)
+        # Create the prompt
         prompt = (
             "Provide a detailed summary of the following text. "
             "Include key points, data, and insights. "
@@ -55,19 +55,21 @@ async def generate_ai_summary(text: str) -> str:
             f"{text}"
         )
 
-        
+        # Tokenize the input
         inputs = tokenizer(
-            prompt, return_tensors="pt", truncation=True, max_length=1024
+            prompt,
+            return_tensors="pt",
+            truncation=True,
+            max_length=1024,  # Adjust based on the model's limit
         )
 
-        # Generate summary using GPT-NeoX
+        # Generate summary
         outputs = model.generate(
             **inputs,
-            max_new_tokens=500,
-            num_beams=5,
-            early_stopping=True,
-            num_return_sequences=1,
-            no_repeat_ngram_size=2,
+            max_new_tokens=500,  # Adjust based on your needs
+            num_beams=5,  # Use beam search for better quality
+            early_stopping=True,  # Stop early if the model finishes
+            no_repeat_ngram_size=2,  # Prevent repeating 2-grams
         )
 
         # Decode the generated summary
@@ -78,8 +80,9 @@ async def generate_ai_summary(text: str) -> str:
         raise HTTPException(status_code=500, detail=f"GPT-NeoX Error: {str(e)}")
 
 
-async def handle_file_upload(file: UploadFile):
-    """Handle file upload, extract text, clean it, and generate AI summary."""
+# File upload endpoint
+@app.post("/api/py/upload")
+async def handle_file_upload(file: UploadFile = File(...)):
     try:
         # Validate file presence
         if not file:
@@ -124,7 +127,6 @@ async def handle_file_upload(file: UploadFile):
                 "aiSummary": summary,
             },
         )
-
     except HTTPException:
         raise
     except Exception as e:
