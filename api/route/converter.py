@@ -31,7 +31,7 @@ class ConversionResult(BaseModel):
 
 
 # Constants
-MAX_FILE_SIZE = 20 * 1024 * 1024  
+MAX_FILE_SIZE = 20 * 1024 * 1024
 SUPPORTED_FORMATS = {
     # Documents
     "application/pdf": "pdf",

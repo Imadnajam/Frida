@@ -29,8 +29,8 @@ import { uploadFile } from "@/app/api/upload_api2";
 
 const DocumentConverter = () => {
     const [files, setFiles] = useState<File[]>([]);
-    const [markdownContent, setMarkdownContent] = useState(null);
-    const [aiSummary, setAiSummary] = useState(null);
+    const [markdownContent, setMarkdownContent] = useState<string>("");
+    const [aiSummary, setAiSummary] = useState<string | null>(null);
     const [fileMetadata, setFileMetadata] = useState<{ filename: string; content_type: string; size: number } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -109,7 +109,7 @@ const DocumentConverter = () => {
 
     const handleReset = () => {
         setFiles([]);
-        setMarkdownContent(null);
+        setMarkdownContent("");
         setAiSummary(null);
         setFileMetadata(null);
         setError(null);
