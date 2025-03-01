@@ -14,3 +14,4 @@ markdown==3.5
 uvicorn==0.30.6
 six==1.17.0
 setuptools==68.0.0
+python-multipart==0.0.20
