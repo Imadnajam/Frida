@@ -192,17 +192,17 @@ const DocumentConverter = () => {
                                     maxFiles: 1,
                                     maxSize: 20 * 1024 * 1024
                                 }}
-                                className="relative bg-background rounded-lg p-6 border border-dashed transition-all hover:border-blue-400"
+                                className="relative  rounded-lg p-6 border border-dashed transition-all "
                             >
                                 <FileInput className="default-none">
                                     <div className="flex items-center justify-center flex-col pt-4 pb-6 w-full">
-                                        <div className="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center mb-4">
-                                            <Paperclip className="h-8 w-8 text-blue-500" />
+                                        <div className="h-16 w-16 rounded-full  flex items-center justify-center mb-4">
+                                            <Paperclip className="h-8 w-8" />
                                         </div>
                                         <p className="mb-1 text-lg font-medium">
-                                            <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                                            <span className="font-semibold ">Click to upload</span> or drag and drop
                                         </p>
-                                        <p className="text-sm text-gray-500 text-center max-w-md">
+                                        <p className="text-sm  text-center max-w-md">
                                             Convert PDF, Word, Excel, CSV, Images, HTML and more to Markdown format
                                         </p>
                                         <div className="mt-4 flex flex-wrap gap-2 justify-center">
