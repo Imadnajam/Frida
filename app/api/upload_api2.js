@@ -48,7 +48,7 @@ export async function uploadFile(file) {
             console.warn("Failed to generate summary, but conversion was successful");
 
             return {
-                markdownContent: conversionData.rawMarkdown,
+                markdownContent: conversionData.markdownContent,
                 aiSummary: "Unable to generate summary for this document.",
                 metadata: conversionData.metadata,
             };

@@ -29,8 +29,8 @@ import { uploadFile } from "@/app/api/upload_api2";
 
 const DocumentConverter = () => {
     const [files, setFiles] = useState<File[]>([]);
-    const [markdownContent, setMarkdownContent] = useState(null);
-    const [aiSummary, setAiSummary] = useState(null);
+    const [markdownContent, setMarkdownContent] = useState<string>("");
+    const [aiSummary, setAiSummary] = useState<string | null>(null);
     const [fileMetadata, setFileMetadata] = useState<{ filename: string; content_type: string; size: number } | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -109,7 +109,7 @@ const DocumentConverter = () => {
 
     const handleReset = () => {
         setFiles([]);
-        setMarkdownContent(null);
+        setMarkdownContent("");
         setAiSummary(null);
         setFileMetadata(null);
         setError(null);
@@ -153,7 +153,7 @@ const DocumentConverter = () => {
 
     return (
         <div className="w-full max-w-3xl mx-auto p-4">
-            <Card className="shadow-lg border-t-4 border-t-blue-500">
+            <Card className="shadow-lg border-t-4 ">
                 <CardHeader className="pb-2">
                     <CardTitle className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -192,17 +192,17 @@ const DocumentConverter = () => {
                                     maxFiles: 1,
                                     maxSize: 20 * 1024 * 1024
                                 }}
-                                className="relative bg-background rounded-lg p-6 border border-dashed transition-all hover:border-blue-400"
+                                className="relative  rounded-lg p-6 border border-dashed transition-all "
                             >
                                 <FileInput className="default-none">
                                     <div className="flex items-center justify-center flex-col pt-4 pb-6 w-full">
-                                        <div className="h-16 w-16 rounded-full bg-blue-50 flex items-center justify-center mb-4">
-                                            <Paperclip className="h-8 w-8 text-blue-500" />
+                                        <div className="h-16 w-16 rounded-full  flex items-center justify-center mb-4">
+                                            <Paperclip className="h-8 w-8" />
                                         </div>
                                         <p className="mb-1 text-lg font-medium">
-                                            <span className="font-semibold text-blue-600">Click to upload</span> or drag and drop
+                                            <span className="font-semibold ">Click to upload</span> or drag and drop
                                         </p>
-                                        <p className="text-sm text-gray-500 text-center max-w-md">
+                                        <p className="text-sm  text-center max-w-md">
                                             Convert PDF, Word, Excel, CSV, Images, HTML and more to Markdown format
                                         </p>
                                         <div className="mt-4 flex flex-wrap gap-2 justify-center">
@@ -219,12 +219,12 @@ const DocumentConverter = () => {
 
                                 <FileUploaderContent>
                                     {files?.map((file, i) => (
-                                        <FileUploaderItem key={i} index={i} className="p-2 bg-blue-50 rounded-md">
+                                        <FileUploaderItem key={i} index={i} className="p-2  rounded-md">
                                             <div className="flex items-center gap-2">
                                                 {getFileIcon(file)}
                                                 <div className="flex-1 truncate">
                                                     <div className="font-medium">{file.name}</div>
-                                                    <div className="text-xs text-gray-500">{formatBytes(file.size)}</div>
+                                                    <div className="text-xs ">{formatBytes(file.size)}</div>
                                                 </div>
                                             </div>
                                         </FileUploaderItem>
@@ -234,7 +234,7 @@ const DocumentConverter = () => {
 
                             <Button
                                 variant="default"
-                                className="w-full py-6 text-md font-medium bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 transition-all"
+                                className="w-full py-6 text-md font-medium   transition-all"
                                 onClick={handleUpload}
                                 disabled={isLoading}
                             >
@@ -254,12 +254,12 @@ const DocumentConverter = () => {
                     ) : (
                         <div className="space-y-4">
                             {fileMetadata && (
-                                <div className="mb-4 flex items-center justify-between p-3 bg-gray-50 rounded-md text-sm">
+                                <div className="mb-4 flex items-center justify-between p-3  rounded-md text-sm">
                                     <div className="flex items-center gap-2">
                                         {getFileIcon({ type: fileMetadata.content_type })}
                                         <span className="font-medium">{fileMetadata.filename}</span>
                                     </div>
-                                    <div className="text-gray-500">
+                                    <div className="">
                                         {formatBytes(fileMetadata.size)}
                                     </div>
                                 </div>
@@ -285,7 +285,7 @@ const DocumentConverter = () => {
                                                                 onClick={() => copyToClipboard(markdownContent)}
                                                             >
                                                                 {copySuccess ? (
-                                                                    <Check className="h-4 w-4 text-green-500" />
+                                                                    <Check className="h-4 w-4 " />
                                                                 ) : (
                                                                     <Copy className="h-4 w-4" />
                                                                 )}
@@ -328,7 +328,7 @@ const DocumentConverter = () => {
                                         <CardHeader className="py-3 px-4">
                                             <h3 className="text-md font-medium">AI-Generated Summary</h3>
                                         </CardHeader>
-                                        <CardContent className="max-h-96 overflow-y-auto bg-gray-50 p-4 rounded-md">
+                                        <CardContent className="max-h-96 overflow-y-auto  p-4 rounded-md">
                                             <div className="prose max-w-none text-sm">
                                                 {aiSummary}
                                             </div>
@@ -340,7 +340,7 @@ const DocumentConverter = () => {
                     )}
                 </CardContent>
 
-                <CardFooter className="text-center text-xs text-gray-500 pt-2 pb-4">
+                <CardFooter className="text-center text-xs  pt-2 pb-4">
                     Supports multiple file formats • Up to 20MB • Instant conversion
                 </CardFooter>
             </Card>

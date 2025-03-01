@@ -1,3 +1,4 @@
+"""
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
@@ -132,3 +133,4 @@ async def handle_file_upload(file: UploadFile = File(...)):
     except Exception as e:
         print("Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
+"""

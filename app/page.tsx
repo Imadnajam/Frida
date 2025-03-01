@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
-import FileUploader from '@/components/uploader';
+import FileUploader from '@/components/convert';
 import { COMPANY_DETAILS } from '@/utils/constants';
 import Navbar from '@/components/pages/nav';
 
@@ -17,21 +17,9 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex-grow flex items-center justify-center p-4">
-        <Card className="w-full max-w-lg shadow-2xl rounded-2xl p-6 transition-transform transform hover:scale-105">
-          <CardHeader>
-           
-          </CardHeader>
-          <CardContent>
-            <p className="mb-6  text-lg">{COMPANY_DETAILS.slogan || "Simplifying your file conversion."}</p>
-            <FileUploader />
-            <div className="mt-6">
-              
-            </div>
-          </CardContent>
-          <CardFooter className="text-center  mt-6">
-            © {COMPANY_DETAILS.year} {COMPANY_DETAILS.name}. All rights reserved.
-          </CardFooter>
-        </Card>
+       <FileUploader />
+            
+          
       </div>
     </div>
   );
