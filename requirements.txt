@@ -13,3 +13,4 @@ bcrypt==3.2.0
 markdown==3.5
 uvicorn==0.30.6
 six==1.17.0
+setuptools==68.0.0
