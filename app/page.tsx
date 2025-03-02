@@ -1,12 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
 import FileUploader from '@/components/convert';
-import { COMPANY_DETAILS } from '@/utils/constants';
-import Navbar from '@/components/pages/nav';
 
+import Navbar from '@/components/pages/nav';
+import Footer from '@/components/pages/footer';
 export default function Home() {
   const [files, setFiles] = useState<File[]>([]);
 
@@ -21,6 +19,7 @@ export default function Home() {
             
           
       </div>
+      <Footer/>
     </div>
   );
 }
