@@ -50,25 +50,18 @@ const Navbar = () => {
                     </NavigationMenu>
                 </div>
 
-                <div className="flex items-center gap-4">
-                    <ThemeModeToggle
-                        messages={{
-                            dark: 'Dark',
-                            light: 'Light',
-                            system: 'System',
-                        }}
-                    />
-
+                <div className="flex items-center gap-6">
+                   
                     {/* Mobile Menu Button - Visible only on mobile */}
                     <Sheet>
                         <SheetTrigger asChild className="md:hidden">
-                            <Button variant="ghost" size="icon">
+                            <Button variant="default" size="icon">
                                 <Menu className="h-6 w-6" />
                                 <span className="sr-only">Toggle menu</span>
                             </Button>
                         </SheetTrigger>
                         <SheetContent side="right" className="w-64">
-                            <div className="flex flex-col space-y-4 mt-8">
+                            <div className="flex flex-col space-y-6 mt-8">
                                 {menuItems.map((item) => (
                                     <Link
                                         key={item.href}
@@ -81,6 +74,14 @@ const Navbar = () => {
                             </div>
                         </SheetContent>
                     </Sheet>
+                    <ThemeModeToggle
+                        messages={{
+                            dark: 'Dark',
+                            light: 'Light',
+                            system: 'System',
+                        }}
+                    />
+
                 </div>
             </div>
         </nav>
