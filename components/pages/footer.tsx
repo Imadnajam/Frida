@@ -104,35 +104,9 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* Supported File Formats */}
-                <div className="mt-12 pt-6 border-t">
-                    <h3 className="font-semibold mb-4">Supported File Formats</h3>
-                    <div className="flex flex-wrap gap-2">
-                        {COMPANY_DETAILS.supportedFileFormats.map((format, index) => (
-                            <span key={index} className="px-3 py-1 bg-accent rounded-full text-sm">
-                                {format}
-                            </span>
-                        ))}
-                    </div>
-                </div>
+                
 
-                {/* Bottom footer bar */}
-                <div className="border-t mt-12 pt-6 flex flex-col md:flex-row justify-between items-center">
-                    <p className="text-sm text-muted-foreground mb-4 md:mb-0">
-                        © {currentYear} {COMPANY_DETAILS.name}. Licensed under {COMPANY_DETAILS.license}. All rights reserved.
-                    </p>
-                    <div className="flex space-x-6">
-                        <Link href="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                            Privacy Policy
-                        </Link>
-                        <Link href="/terms" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                            Terms of Service
-                        </Link>
-                        <Link href="/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                            Cookie Policy
-                        </Link>
-                    </div>
-                </div>
+                
             </div>
         </footer>
     );
