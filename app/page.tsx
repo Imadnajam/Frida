@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import FileUploader from '@/components/convert';
+import FileUploader from '@/components/DocumentConverter';
 
 import Navbar from '@/components/pages/nav';
 import Footer from '@/components/pages/footer';
