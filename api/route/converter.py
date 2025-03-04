@@ -64,6 +64,92 @@ def create_error_response(status_code: int, detail: str) -> JSONResponse:
     )
 
 
+# Markdown Styler (New addition)
+class MarkdownStyler:
+  
+
+    @staticmethod
+    def generate_header(text: str, level: int = 1, underline: bool = True) -> str:
+        """Generate a styled markdown header"""
+        header = "#" * level + " " + text
+
+        if underline and level <= 2:
+            underline_char = "=" if level == 1 else "-"
+            header += f"\n{underline_char * len(text)}"
+
+        return header
+
+    @staticmethod
+    def create_block_quote(text: str, author: Optional[str] = None) -> str:
+        """Create a styled block quote"""
+        quote = f'> *"{text}"*\n'
+        if author:
+            quote += f"> — *{author}*"
+        return quote
+
+    @staticmethod
+    def enhance_markdown(markdown_text: str, metadata: Dict) -> str:
+        """
+        Enhance markdown with additional styling and metadata information
+
+        Args:
+            markdown_text (str): Original markdown content
+            metadata (dict): File metadata
+
+        Returns:
+            str: Enhanced markdown with styling and metadata
+        """
+        # Create a styled header section
+        header_sections = []
+
+        # Add file information as a quote
+        file_info_quote = (
+            f"File: **{metadata.get('filename', 'Unknown')}**\n"
+            f"Type: `{metadata.get('content_type', 'Unknown')}`\n"
+            f"Size: *{metadata.get('size', 0)} bytes*"
+        )
+
+        header_sections.append(MarkdownStyler.create_block_quote(file_info_quote))
+
+        # Add horizontal rule
+        header_sections.append("---")
+
+        # Additional metadata processing based on content type
+        content_type = metadata.get("content_type", "")
+
+        if content_type == "application/pdf":
+            header_sections.append(
+                MarkdownStyler.create_block_quote(
+                    f"Pages: {metadata.get('page_count', 'Unknown')}\n"
+                    + "\n".join(
+                        [
+                            f"{k}: {v}"
+                            for k, v in metadata.items()
+                            if k
+                            not in ["filename", "content_type", "size", "page_count"]
+                        ]
+                    )
+                )
+            )
+
+        elif content_type == "text/csv":
+            header_sections.append(
+                f"**Columns:** {metadata.get('columns', 'N/A')}\n"
+                + f"**Rows:** {metadata.get('rows', 'N/A')}"
+            )
+
+        elif content_type == "application/json":
+            keys = metadata.get("keys", [])
+            header_sections.append(
+                f"**JSON Keys:** `{', '.join(keys[:10]) + ('...' if len(keys) > 10 else '')}`"
+            )
+
+        # Combine header sections
+        enhanced_markdown = "\n\n".join(header_sections) + "\n\n" + markdown_text
+
+        return enhanced_markdown
+
+
 def clean_text(text: str) -> str:
     """Clean extracted text for better markdown compatibility"""
     # Remove excessive whitespace
@@ -539,7 +625,7 @@ async def convert_unknown_to_markdown(file: UploadFile) -> ConversionResult:
 @router.post("/convert")
 async def convert_to_markdown(file: UploadFile = File(...)):
     """
-    Convert various file formats to Markdown.
+    Convert various file formats to Markdown with enhanced styling.
     Supports PDF, DOCX, TXT, HTML, CSV, JSON, XLSX, images, and more.
     """
     try:
@@ -588,8 +674,13 @@ async def convert_to_markdown(file: UploadFile = File(...)):
             # Try to handle unknown formats
             result = await convert_unknown_to_markdown(file)
 
+        # Enhance markdown with additional styling and metadata
+        enhanced_markdown = MarkdownStyler.enhance_markdown(
+            result.markdown, result.metadata
+        )
+
         # Format the markdown as a code block for the API response
-        markdown_code_block = f"```markdown\n{result.markdown}\n```"
+        markdown_code_block = f"```markdown\n{enhanced_markdown}\n```"
 
         # Return the response
         return JSONResponse(
@@ -598,7 +689,7 @@ async def convert_to_markdown(file: UploadFile = File(...)):
                 "success": True,
                 "message": "File converted successfully",
                 "markdownContent": markdown_code_block,
-                "rawMarkdown": result.markdown,
+                "rawMarkdown": enhanced_markdown,
                 "metadata": result.metadata,
                 "preview": result.preview,
                 "sourceFormat": SUPPORTED_FORMATS.get(content_type, "unknown"),
