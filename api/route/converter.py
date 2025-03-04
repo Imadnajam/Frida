@@ -625,7 +625,7 @@ async def convert_unknown_to_markdown(file: UploadFile) -> ConversionResult:
 @router.post("/convert")
 async def convert_to_markdown(file: UploadFile = File(...)):
     """
-    Convert various file formats to Markdown.
+    Convert various file formats to Markdown with enhanced styling.
     Supports PDF, DOCX, TXT, HTML, CSV, JSON, XLSX, images, and more.
     """
     try:
@@ -674,8 +674,13 @@ async def convert_to_markdown(file: UploadFile = File(...)):
             # Try to handle unknown formats
             result = await convert_unknown_to_markdown(file)
 
+        # Enhance markdown with additional styling and metadata
+        enhanced_markdown = MarkdownStyler.enhance_markdown(
+            result.markdown, result.metadata
+        )
+
         # Format the markdown as a code block for the API response
-        markdown_code_block = f"```markdown\n{result.markdown}\n```"
+        markdown_code_block = f"```markdown\n{enhanced_markdown}\n```"
 
         # Return the response
         return JSONResponse(
@@ -684,7 +689,7 @@ async def convert_to_markdown(file: UploadFile = File(...)):
                 "success": True,
                 "message": "File converted successfully",
                 "markdownContent": markdown_code_block,
-                "rawMarkdown": result.markdown,
+                "rawMarkdown": enhanced_markdown,
                 "metadata": result.metadata,
                 "preview": result.preview,
                 "sourceFormat": SUPPORTED_FORMATS.get(content_type, "unknown"),
