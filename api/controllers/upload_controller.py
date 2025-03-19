@@ -1,4 +1,4 @@
-"""
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
 from PyPDF2 import PdfReader
@@ -9,7 +9,7 @@ import re
 app = FastAPI()
 
 # Constants
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
+MAX_FILE_SIZE = 10 * 1024 * 1024 
 MODEL_NAME = "EleutherAI/gpt-neo-125M"
 
 # Load tokenizer and model
@@ -133,4 +133,3 @@ async def handle_file_upload(file: UploadFile = File(...)):
     except Exception as e:
         print("Unexpected error:", str(e))
         raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
-"""
