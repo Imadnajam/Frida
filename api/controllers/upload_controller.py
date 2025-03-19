@@ -82,7 +82,7 @@ async def generate_ai_summary(text: str) -> str:
 
 
 # File upload endpoint
-@app.post("/api/py/upload")
+
 async def handle_file_upload(file: UploadFile = File(...)):
     try:
         # Validate file presence

@@ -1,117 +1,98 @@
 "use client";
 
 import { useState } from "react";
-import {
-    FileUploader,
-    FileUploaderContent,
-    FileUploaderItem,
-    FileInput,
-} from "@/components/ui/file-upload";
-import { Paperclip } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { uploadFile } from "@/app/api/upload_api";
-import { CircularProgress } from "@/components/ui/circular-progress";
+import FileUploaderTest from "@/components/uploader"; 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, History, Settings } from "lucide-react";
 
-const FileUploaderTest = () => {
-    const [files, setFiles] = useState<File[] | null>(null);
-    const [markdownContent, setMarkdownContent] = useState<string | null>(null);
-    const [aiSummary, setAiSummary] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(false); // State for loading
-
-    const handleUpload = async () => {
-        if (!files || files.length === 0) {
-            alert("No files selected");
-            return;
-        }
-
-        setIsLoading(true); // Start loading
-        try {
-            const { markdownContent, aiSummary } = await uploadFile(files[0]);
-            setMarkdownContent(markdownContent);
-            setAiSummary(aiSummary);
-        } catch (error) {
-            alert(error);
-        } finally {
-            setIsLoading(false); // Stop loading
-        }
-    };
+const FileUploadPage = () => {
+    const [activeTab, setActiveTab] = useState("upload");
+    const [uploadHistory, setUploadHistory] = useState([
+        { id: 1, filename: "report.pdf", date: "2025-03-15", status: "complete" },
+        { id: 2, filename: "document.pdf", date: "2025-03-12", status: "complete" },
+        { id: 3, filename: "presentation.pdf", date: "2025-03-08", status: "failed" }
+    ]);
 
     return (
-        <div className="mx-auto ">
-            {!markdownContent && !aiSummary ? (
-                <div className="space-y-4">
-                    <FileUploader
-                        value={files}
-                        onValueChange={setFiles}
-                        dropzoneOptions={{ maxFiles: 1, maxSize: 4 * 1024 * 1024 }}
-                        className="relative bg-background rounded-lg p-4 border border-dashed "
-                    >
-                        <FileInput className="outline-none">
-                            <div className="flex items-center justify-center flex-col pt-3 pb-4 w-full">
-                                <Paperclip className="h-8 w-8  mb-2" />
-                                <p className="mb-1 text-sm ">
-                                    <span className="font-semibold">Click to upload</span> or drag and drop
-                                </p>
-                                <p className="text-xs ">Only PDF files are converted to Markdown</p>
-                            </div>
-                        </FileInput>
-                        <FileUploaderContent>
-                            {files?.map((file, i) => (
-                                <FileUploaderItem key={i} index={i}>
-                                    <Paperclip className="h-4 w-4 stroke-current" />
-                                    <span>{file.name}</span>
-                                </FileUploaderItem>
-                            ))}
-                        </FileUploaderContent>
-                    </FileUploader>
+        <div className="container mx-auto py-8 px-4 max-w-5xl">
+            <div className="text-center mb-8">
+                <h1 className="text-3xl font-bold mb-2">Document Processor</h1>
+                <p className="text-gray-500">Upload PDFs to convert them to markdown and get AI summaries</p>
+            </div>
 
-                    <Button
-                        variant="default"
-                        className="w-full py-2 "
-                        onClick={handleUpload}
-                        disabled={isLoading}
-                    >
-                        {isLoading ? (
-                            <div className="flex items-center justify-center gap-2">
-                                <CircularProgress className="h-4 w-4" /> 
-                                <span>Processing...</span>
-                            </div>
-                        ) : (
-                            "Upload & Convert File"
-                        )}
-                    </Button>
+            <Tabs defaultValue="upload" value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <div className="flex justify-center mb-6">
+                    <TabsList className="grid grid-cols-3 w-full max-w-md">
+                        <TabsTrigger value="upload" className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span>Upload</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="history" className="flex items-center gap-2">
+                            <History className="h-4 w-4" />
+                            <span>History</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="settings" className="flex items-center gap-2">
+                            <Settings className="h-4 w-4" />
+                            <span>Settings</span>
+                        </TabsTrigger>
+                    </TabsList>
                 </div>
-            ) : (
-                <div className="">
-                    {/* Card for Extracted Markdown Content */}
-                    <Card className="shadow-lg flex-1">
-                        <CardHeader>
-                            <h3 className="text-lg font-bold ">Extracted Markdown Content</h3>
-                        </CardHeader>
-                        <CardContent className="max-h-64 overflow-y-auto">
-                            <pre className="whitespace-pre-wrap text-sm ">
-                                {markdownContent}
-                            </pre>
-                        </CardContent>
-                        </Card>
-                        <br />
 
-                    {/* Card for AI Summary */}
-                    <Card className="shadow-lg flex-1">
-                        <CardHeader>
-                            <h3 className="text-lg font-bold ">Frida Summary</h3>
+                <TabsContent value="upload" className="mt-0">
+                    <Card className="bg-white shadow-lg border-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                            <CardTitle className="text-xl font-medium">Upload Document</CardTitle>
                         </CardHeader>
-                        <CardContent className="max-h-64 overflow-y-auto">
-                            <pre className="whitespace-pre-wrap text-sm ">
-                                {aiSummary}
-                            </pre>
+                        <CardContent className="p-6">
+                            <FileUploaderTest />
                         </CardContent>
                     </Card>
-                </div>
-            )}
+                </TabsContent>
+
+                <TabsContent value="history" className="mt-0">
+                    <Card className="bg-white shadow-lg border-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                            <CardTitle className="text-xl font-medium">Upload History</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <div className="space-y-4">
+                                {uploadHistory.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 hover:bg-gray-100 transition"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FileText className="h-6 w-6 text-blue-500" />
+                                            <div>
+                                                <p className="font-medium">{item.filename}</p>
+                                                <p className="text-sm text-gray-500">{item.date}</p>
+                                            </div>
+                                        </div>
+                                        <span className={`text-sm px-2 py-1 rounded-full ${item.status === 'complete' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {item.status === 'complete' ? 'Completed' : 'Failed'}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="settings" className="mt-0">
+                    <Card className="bg-white shadow-lg border-0">
+                        <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+                            <CardTitle className="text-xl font-medium">Settings</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            <p className="text-center text-gray-500">Settings panel coming soon</p>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
 };
 
-export default FileUploaderTest;
+export default FileUploadPage;
