@@ -1,10 +1,11 @@
+accelerate==1.5.2
+transformers==4.49.0
 beautifulsoup4==4.13.3
 docx2txt==0.8
 fastapi==0.115.10
 html2text==2020.1.16
 mammoth==1.6.0
 openpyxl==3.1.2
-
 Pillow==11.1.0
 pydantic==2.10.6
 email-validator==2.2.0
@@ -18,3 +19,6 @@ setuptools==68.0.0
 python-multipart==0.0.20
 dnspython==2.6.1  
 pymongo[srv]==4.6.0
+
+
+
