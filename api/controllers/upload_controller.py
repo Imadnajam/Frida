@@ -5,7 +5,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import re
 import logging
 
-# Configure logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 MAX_FILE_SIZE = 10 * 1024 * 1024
 MODEL_NAME = "EleutherAI/gpt-neo-125M"
 
-# Lazy loading for tokenizer and model
+
 tokenizer = None
 model = None
 
@@ -27,7 +27,7 @@ def load_model():
             if tokenizer.pad_token is None:
                 tokenizer.pad_token = tokenizer.eos_token
 
-            # Standard loading without Accelerate options
+        
             model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
             logger.info("Model loaded successfully")
         except Exception as e:
@@ -35,7 +35,7 @@ def load_model():
             raise RuntimeError(f"Failed to load model: {str(e)}")
 
 
-# Utility function to clean text
+
 def clean_text(text: str) -> str:
     cleaned_text = re.sub(r"[\$\^*\\_\[\]{}()~#]", "", text)
     cleaned_text = " ".join(cleaned_text.split())
@@ -84,11 +84,11 @@ async def generate_ai_summary(text: str) -> str:
         )
 
         logger.info("Generating summary")
-        # Generate summary with reduced parameters for efficiency
+    
         outputs = model.generate(
             **inputs,
-            max_new_tokens=200,  # Reduced from 500 to prevent timeouts
-            num_beams=3,  # Reduced from 5 to be more efficient
+            max_new_tokens=200,  
+            num_beams=3,  
             early_stopping=True,
             no_repeat_ngram_size=2,
         )
