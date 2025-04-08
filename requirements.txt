@@ -1,5 +1,4 @@
 accelerate==1.5.2
-transformers==4.49.0
 beautifulsoup4==4.13.3
 docx2txt==0.8
 fastapi==0.115.10
