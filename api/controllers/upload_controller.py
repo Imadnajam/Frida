@@ -67,12 +67,15 @@ async def generate_ai_summary(text: str) -> str:
 
         logger.info("Creating prompt")
         # Create the prompt
+      
         prompt = (
-            "Provide a detailed summary of the following text. "
-            "Include key points, data, and insights. "
-            "Explain the main ideas, supporting evidence, and conclusions.\n\n"
-            f"{text[:4000]}"  
+            "Identify conceptual gaps and unclear claims in this draft. " 
+            "Highlight missing evidence needed to support arguments about: "
+            "1. Smart animal technologies\n2. Advantages/disadvantages\n3. Societal impact\n\n" 
+            f"{text[:4000]}"
         )
+
+
 
         logger.info("Tokenizing input")
         # Tokenize the input
@@ -82,17 +85,17 @@ async def generate_ai_summary(text: str) -> str:
             truncation=True,
             max_length=1024,
         )
+        # Tune generation for analytical tasks
+        outputs = model.generate(
+          **inputs,
+          max_new_tokens=400,  # Allow deeper analysis
+          repetition_penalty=2.0,  # Reduce redundancy
+          temperature=0.7,  # Encourage critical tone
+         )
 
         logger.info("Generating summary")
     
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=200,  
-            num_beams=3,  
-            early_stopping=True,
-            no_repeat_ngram_size=2,
-        )
-
+        
         logger.info("Decoding summary")
         # Decode the generated summary
         summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
