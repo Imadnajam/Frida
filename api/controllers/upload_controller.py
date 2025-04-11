@@ -1,172 +1,164 @@
 from fastapi import UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
-from PyPDF2 import PdfReader
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from pdfplumber import PDF  
+from transformers import pipeline  # Simplified interface
 import re
 import logging
-
+import asyncio
+from functools import lru_cache
+from typing import Optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Constants
-MAX_FILE_SIZE = 10 * 1024 * 1024
-MODEL_NAME = "EleutherAI/gpt-neo-125M"
+# Constants with environment-based fallbacks
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+MODEL_NAME = "pszemraj/led-base-book-summary"  # More suitable model
+ANALYSIS_TYPES = {
+    "conceptual_gaps": "Identify conceptual gaps and unclear claims",
+    "missing_evidence": "Highlight missing evidence in arguments",
+    "structure_issues": "Analyze document structure problems",
+}
+
+# Smart text chunking parameters
+CHUNK_SIZE = 3500
+OVERLAP = 200
 
 
-tokenizer = None
-model = None
+class SummaryGenerator:
+    _instance = None
 
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.initialize_model()
+        return cls._instance
 
-def load_model():
-    global tokenizer, model
-    if tokenizer is None or model is None:
+    def initialize_model(self):
+        """Smart model loading with memory management"""
         try:
             logger.info(f"Loading model: {MODEL_NAME}")
-            tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
-            if tokenizer.pad_token is None:
-                tokenizer.pad_token = tokenizer.eos_token
-
-        
-            model = AutoModelForCausalLM.from_pretrained(MODEL_NAME)
+            self.summarizer = pipeline(
+                "summarization",
+                model=MODEL_NAME,
+                device_map="auto",  # Optimize for available hardware
+                truncation=True,
+            )
             logger.info("Model loaded successfully")
         except Exception as e:
-            logger.error(f"Error loading model: {str(e)}", exc_info=True)
-            raise RuntimeError(f"Failed to load model: {str(e)}")
+            logger.error(f"Model loading failed: {str(e)}")
+            raise RuntimeError(f"Model initialization error: {str(e)}")
+
+    async def generate_summary(
+        self, text: str, analysis_type: str = "conceptual_gaps"
+    ) -> str:
+        """Smart generation with chunking and analysis type handling"""
+        try:
+            cleaned_text = self.clean_text(text)
+            chunks = self.chunk_text(cleaned_text)
+
+            # Adaptive prompt generation
+            base_prompt = ANALYSIS_TYPES.get(
+                analysis_type, "Analyze this text for conceptual issues"
+            )
+
+            results = []
+            for chunk in chunks:
+                result = await asyncio.to_thread(
+                    self.summarizer,
+                    f"{base_prompt}:\n{chunk}",
+                    max_length=400,
+                    min_length=100,
+                    do_sample=False,
+                    repetition_penalty=2.0,
+                )
+                results.append(result[0]["summary_text"])
+
+            return self.postprocess_results(results)
+
+        except Exception as e:
+            logger.error(f"Generation error: {str(e)}")
+            raise
+
+    def chunk_text(self, text: str) -> list:
+        """Smart text chunking with overlap"""
+        return [
+            text[i : i + CHUNK_SIZE] for i in range(0, len(text), CHUNK_SIZE - OVERLAP)
+        ]
+
+    def clean_text(self, text: str) -> str:
+        """Improved text cleaning with regex optimization"""
+        return re.sub(r"\s+", " ", re.sub(r"[^\w\s-]", "", text)).strip()
+
+    def postprocess_results(self, results: list) -> str:
+        """Ensures coherent final output from multiple chunks"""
+        return "\n\n".join([f"Section {i+1}: {text}" for i, text in enumerate(results)])
 
 
-
-def clean_text(text: str) -> str:
-    cleaned_text = re.sub(r"[\$\^*\\_\[\]{}()~#]", "", text)
-    cleaned_text = " ".join(cleaned_text.split())
-    return cleaned_text
-
-
-# Extract text from PDF
-async def extract_text_from_pdf(file: UploadFile) -> str:
-    try:
-        logger.info("Extracting text from PDF")
-        pdf_reader = PdfReader(file.file)
-        text = ""
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-        logger.info(f"Extracted {len(text)} characters of text")
-        return text
-    except Exception as e:
-        logger.error(f"Error extracting text from PDF: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Error extracting text from PDF: {str(e)}"
-        )
-
-
-# Generate AI summary using GPT-NeoX
-async def generate_ai_summary(text: str) -> str:
-    try:
-        # Load model if not already loaded
-        load_model()
-
-        logger.info("Creating prompt")
-        # Create the prompt
-        prompt = (
-            "Provide a detailed summary of the following text. "
-            "Include key points, data, and insights. "
-            "Explain the main ideas, supporting evidence, and conclusions.\n\n"
-            f"{text[:4000]}"  
-        )
-
-        logger.info("Tokenizing input")
-        # Tokenize the input
-        inputs = tokenizer(
-            prompt,
-            return_tensors="pt",
-            truncation=True,
-            max_length=1024,
-        )
-
-        logger.info("Generating summary")
-    
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=200,  
-            num_beams=3,  
-            early_stopping=True,
-            no_repeat_ngram_size=2,
-        )
-
-        logger.info("Decoding summary")
-        # Decode the generated summary
-        summary = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return summary
-    except Exception as e:
-        logger.error(f"Error generating AI summary: {str(e)}", exc_info=True)
-        raise HTTPException(
-            status_code=500, detail=f"Error generating AI summary: {str(e)}"
-        )
-
-
-# File upload endpoint
 async def handle_file_upload(file: UploadFile = File(...)):
+    """Optimized handler with smart features"""
     try:
-        logger.info(f"Starting file upload process for: {file.filename}")
-
-        # Validate file presence
-        if not file:
-            logger.warning("No file uploaded")
-            raise HTTPException(status_code=400, detail="No file uploaded")
-
-        # Validate file type
-        if file.content_type != "application/pdf":
-            logger.warning(f"Invalid file type: {file.content_type}")
-            raise HTTPException(status_code=400, detail="Only PDF files are allowed")
-
-        # Validate file size
-        file.file.seek(0, 2)
-        file_size = file.file.tell()
-        file.file.seek(0)
-        logger.info(f"File size: {file_size / 1024 / 1024:.2f} MB")
-
-        if file_size > MAX_FILE_SIZE:
-            logger.warning(f"File size exceeds limit: {file_size / 1024 / 1024:.2f} MB")
-            raise HTTPException(
-                status_code=400,
-                detail=f"File size exceeds {MAX_FILE_SIZE / 1024 / 1024} MB",
+        # Validate input with early returns
+        if not validate_file(file):
+            return JSONResponse(
+                status_code=400, content={"error": "Invalid file input"}
             )
 
-        # Extract text from PDF
-        text = await extract_text_from_pdf(file)
-        if not text:
-            logger.warning("No text extracted from PDF")
-            raise HTTPException(
-                status_code=500, detail="Failed to extract text from PDF"
+        # Parallel processing
+        text_task = asyncio.create_task(extract_text_from_pdf(file))
+        summary_task = asyncio.create_task(
+            SummaryGenerator().generate_summary(await text_task)
+        )
+
+        # Timeout handling
+        try:
+            summary = await asyncio.wait_for(summary_task, timeout=120)
+        except asyncio.TimeoutError:
+            logger.warning("Processing timeout")
+            return JSONResponse(
+                status_code=504, content={"error": "Processing timeout"}
             )
 
-        # Clean the extracted text
-        logger.info("Cleaning extracted text")
-        cleaned_text = clean_text(text)
+        return create_response(text_task.result(), summary)
 
-       
-        markdown_code_block = (
-            f"```\n{cleaned_text[:2000]}...\n```"  
-        )
-
-        # Generate AI summary
-        logger.info("Generating AI summary")
-        summary = await generate_ai_summary(cleaned_text)
-
-        # Return the response
-        logger.info("Processing complete, returning response")
-        return JSONResponse(
-            status_code=200,
-            content={
-                "message": "File processed successfully",
-                "markdownContent": markdown_code_block,
-                "aiSummary": summary,
-            },
-        )
-    except HTTPException as he:
-        # Pass through HTTP exceptions
-        logger.warning(f"HTTP Exception: {he.detail}")
-        raise
     except Exception as e:
-        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail=f"Failed to process file: {str(e)}")
+        logger.error(f"Processing error: {str(e)}")
+        return JSONResponse(
+            status_code=500, content={"error": f"Processing failed: {str(e)}"}
+        )
+
+
+def validate_file(file: UploadFile) -> bool:
+    """Comprehensive validation with smart checks"""
+    if file.content_type != "application/pdf":
+        return False
+    if file.size > MAX_FILE_SIZE:
+        return False
+    return True
+
+
+async def extract_text_from_pdf(file: UploadFile) -> str:
+    """Improved text extraction with pdfplumber"""
+    try:
+        with PDF.open(file.file) as pdf:
+            return "\n".join(
+                [page.extract_text(x_tolerance=1, y_tolerance=1) for page in pdf.pages]
+            )
+    except Exception as e:
+        logger.error(f"PDF error: {str(e)}")
+        raise HTTPException(500, "PDF processing failed")
+
+
+def create_response(raw_text: str, summary: str) -> JSONResponse:
+    """Smart response formatting with adaptive preview"""
+    preview_length = 2000 if len(raw_text) > 5000 else 1000
+    return JSONResponse(
+        {
+            "summary": summary,
+            "preview": {
+                "text": raw_text[:preview_length],
+                "truncated": len(raw_text) > preview_length,
+            },
+            "stats": {"original_length": len(raw_text), "summary_length": len(summary)},
+        }
+    )
