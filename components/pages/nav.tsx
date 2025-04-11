@@ -47,8 +47,8 @@ const Navbar = () => {
             ]
         },
         {
-            href: '/contact',
-            label: 'Contact',
+            href: '/ai',
+            label: 'AI Document chat',
             hasDropdown: false
         },
     ];
