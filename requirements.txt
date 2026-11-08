@@ -16,6 +16,6 @@ uvicorn==0.30.6
 six==1.17.0
 setuptools==78.1.1
 python-multipart==0.0.20
-dnspython==2.6.1  
+dnspython==2.9.0  
 pymongo[srv]==4.18.2
 pdfplumber==0.11.6
